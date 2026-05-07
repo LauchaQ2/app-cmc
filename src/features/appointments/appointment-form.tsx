@@ -8,7 +8,10 @@ import { toast } from "sonner";
 import type { Client, Employee, EmployeeService, Service } from "@/types/domain";
 import { appointmentSchema } from "@/lib/schemas";
 import { apiGet, apiMutation } from "@/lib/api";
-import { enqueuePendingAppointment } from "@/features/appointments/offline-queue";
+import {
+  enqueuePendingAppointment,
+  type AppointmentQueuePayload,
+} from "@/features/appointments/offline-queue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -117,9 +120,11 @@ export function AppointmentForm({
     }
 
     try {
-      const payload = {
+      const payload: AppointmentQueuePayload = {
         ...values,
         amount: service.price,
+        status: values.status ?? "pendiente",
+        payment_status: values.payment_status ?? "pendiente",
       };
 
       if (!navigator.onLine) {
@@ -140,9 +145,11 @@ export function AppointmentForm({
       await onCreated();
     } catch (error) {
       if ((error as Error).message.toLowerCase().includes("failed to fetch")) {
-        const payload = {
+        const payload: AppointmentQueuePayload = {
           ...values,
           amount: service.price,
+          status: values.status ?? "pendiente",
+          payment_status: values.payment_status ?? "pendiente",
         };
         enqueuePendingAppointment(payload);
         toast.info("No se pudo conectar: turno guardado para sincronizar");
