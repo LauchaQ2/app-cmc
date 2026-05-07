@@ -20,10 +20,10 @@ export const employeeSchema = z.object({
 export const serviceSchema = z.object({
   name: z.string().min(2),
   duration_minutes: z
-    .number({ coerce: true })
+    .coerce.number()
     .min(SLOT_MINUTES)
     .refine((v) => v % SLOT_MINUTES === 0, "Debe ser multiplo de 15 minutos"),
-  price: z.number({ coerce: true }).min(0),
+  price: z.coerce.number().min(0),
   description: z.string().optional(),
   active: z.boolean().default(true),
 });
@@ -36,6 +36,6 @@ export const appointmentSchema = z.object({
   start_time: z.string().regex(/^\d{2}:\d{2}$/),
   status: z.enum(APPOINTMENT_STATUSES).default("pendiente"),
   payment_status: z.enum(PAYMENT_STATUSES).default("pendiente"),
-  amount: z.number({ coerce: true }).min(0),
+  amount: z.coerce.number().min(0),
   notes: z.string().optional(),
 });

@@ -66,12 +66,9 @@ const messages = {
 };
 
 const calendarFormats = {
-  weekdayFormat: (date: Date, culture: string | undefined, localizer: { format: (value: Date, format: string, culture?: string) => string }) =>
-    localizer.format(date, "EEE", culture),
-  dayFormat: (date: Date, culture: string | undefined, localizer: { format: (value: Date, format: string, culture?: string) => string }) =>
-    localizer.format(date, "eee d/M", culture),
-  dayHeaderFormat: (date: Date, culture: string | undefined, localizer: { format: (value: Date, format: string, culture?: string) => string }) =>
-    localizer.format(date, "eeee d 'de' MMMM", culture),
+  weekdayFormat: "eee",
+  dayFormat: "eee d/M",
+  dayHeaderFormat: "eeee d 'de' MMMM",
 };
 
 const CALENDAR_MIN_TIME = new Date(1970, 0, 1, 8, 0, 0);
