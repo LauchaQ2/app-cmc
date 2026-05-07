@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function UpdatePasswordPage() {
+function UpdatePasswordContent() {
   const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -95,5 +95,26 @@ export default function UpdatePasswordPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function UpdatePasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="page-gradient flex min-h-screen items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Actualizar contrasena</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+            </CardContent>
+          </Card>
+        </main>
+      }
+    >
+      <UpdatePasswordContent />
+    </Suspense>
   );
 }
