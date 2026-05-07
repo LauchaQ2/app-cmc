@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@import "react-big-calendar/lib/css/react-big-calendar.css";
+
+:root {
+  --background: #fff9f3;
+  --foreground: #262322;
+  --muted: #f3ece3;
+  --muted-foreground: #6e655d;
+  --card: #ffffff;
+  --card-foreground: #262322;
+  --border: #e5d6c5;
+  --primary: #d87543;
+  --primary-foreground: #ffffff;
+  --secondary: #4e7b68;
+  --accent: #ffe8c8;
+  --danger: #b22222;
+  --radius: 0.8rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.rbc-calendar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
+
+.rbc-event {
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  padding: 2px 6px;
+}
+
+.rbc-time-view,
+.rbc-month-view {
+  border-color: var(--border);
+}
+
+.rbc-time-view {
+  --calendar-time-gutter-width: 72px;
+}
+
+.rbc-time-view .rbc-time-header-gutter,
+.rbc-time-view .rbc-time-gutter {
+  box-sizing: border-box;
+  width: var(--calendar-time-gutter-width);
+  min-width: var(--calendar-time-gutter-width);
+  max-width: var(--calendar-time-gutter-width);
+}
+
+.rbc-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  padding: 0.35rem 0;
+}
+
+.rbc-time-header-content .rbc-row,
+.rbc-time-view .rbc-time-header-gutter {
+  min-height: 2.1rem;
+}
+
+.rbc-toolbar button {
+  border-radius: 999px;
+  border-color: var(--border);
+}
+
+.rbc-toolbar button.rbc-active,
+.rbc-toolbar button:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.page-gradient {
+  background-image: radial-gradient(circle at 10% 0%, #ffe8d4 0, transparent 40%),
+    radial-gradient(circle at 90% 15%, #e2f0e9 0, transparent 36%);
+}
