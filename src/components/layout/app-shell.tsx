@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
+const SESSION_COOKIE = "cmc_login_at";
+
 type AppShellProps = {
   children: React.ReactNode;
 };
@@ -41,6 +43,7 @@ export function AppShell({ children }: AppShellProps) {
         toast.error(error.message);
         return;
       }
+      document.cookie = `${SESSION_COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`;
       router.replace("/login");
       router.refresh();
     } catch (error) {

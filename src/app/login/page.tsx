@@ -10,6 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const SESSION_COOKIE = "cmc_login_at";
+const SESSION_MAX_AGE_SECONDS = 2 * 60 * 60;
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -31,6 +34,8 @@ export default function LoginPage() {
         toast.error(error.message);
         return;
       }
+
+      document.cookie = `${SESSION_COOKIE}=${Date.now()}; Max-Age=${SESSION_MAX_AGE_SECONDS}; Path=/; SameSite=Lax`;
 
       toast.success("Sesion iniciada");
       router.replace("/");

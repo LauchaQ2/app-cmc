@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const LOGIN_PAGE = "/login";
+const SESSION_COOKIE = "cmc_login_at";
+const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000;
+
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
     request: {
@@ -34,30 +38,40 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
-  const isRegisterPage = request.nextUrl.pathname.startsWith("/register");
-  const isRecoverPage = request.nextUrl.pathname.startsWith("/recuperar");
-  const isUpdatePasswordPage = request.nextUrl.pathname.startsWith(
-    "/actualizar-password",
-  );
+  const isLoginPage = request.nextUrl.pathname.startsWith(LOGIN_PAGE);
   const isPublicPath =
     isLoginPage ||
-    isRegisterPage ||
-    isRecoverPage ||
-    isUpdatePasswordPage ||
-    request.nextUrl.pathname.startsWith("/offline") ||
     request.nextUrl.pathname.startsWith("/_next") ||
     request.nextUrl.pathname.startsWith("/icons") ||
     request.nextUrl.pathname.startsWith("/manifest.json") ||
+    request.nextUrl.pathname.startsWith("/sw.js") ||
     request.nextUrl.pathname.startsWith("/api");
+
+  const loginAt = Number(request.cookies.get(SESSION_COOKIE)?.value ?? 0);
+  const isSessionExpired =
+    Boolean(user) && (!Number.isFinite(loginAt) || Date.now() - loginAt > SESSION_MAX_AGE_MS);
+
+  if (isSessionExpired) {
+    const url = request.nextUrl.clone();
+    url.pathname = LOGIN_PAGE;
+    const redirect = NextResponse.redirect(url);
+
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith("sb-") || cookie.name === SESSION_COOKIE) {
+        redirect.cookies.delete(cookie.name);
+      }
+    }
+
+    return redirect;
+  }
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = LOGIN_PAGE;
     return NextResponse.redirect(url);
   }
 
-  if (user && (isLoginPage || isRegisterPage || isRecoverPage)) {
+  if (user && isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
