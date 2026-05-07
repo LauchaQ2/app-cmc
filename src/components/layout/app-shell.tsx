@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { CalendarDays, CalendarRange, Home, Scissors, UserCheck, Users } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -8,6 +9,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const SESSION_COOKIE = "cmc_login_at";
+const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000;
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -25,14 +27,92 @@ const navItems = [
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  if (
+  const isAuthPage =
     pathname?.startsWith("/login") ||
     pathname?.startsWith("/register") ||
     pathname?.startsWith("/recuperar") ||
-    pathname?.startsWith("/actualizar-password")
-  ) {
+    pathname?.startsWith("/actualizar-password");
+
+  useEffect(() => {
+    if (isAuthPage) {
+      setIsAuthorized(true);
+      setIsCheckingAuth(false);
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+
+    const validateSession = async () => {
+      try {
+        setIsCheckingAuth(true);
+
+        const loginAtCookie = document.cookie
+          .split("; ")
+          .find((item) => item.startsWith(`${SESSION_COOKIE}=`));
+
+        const loginAt = Number(loginAtCookie?.split("=")[1] ?? 0);
+        const isExpired =
+          !Number.isFinite(loginAt) || Date.now() - loginAt > SESSION_MAX_AGE_MS;
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user || isExpired) {
+          await supabase.auth.signOut();
+          document.cookie = `${SESSION_COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`;
+          setIsAuthorized(false);
+          router.replace("/login");
+          router.refresh();
+          return;
+        }
+
+        setIsAuthorized(true);
+      } catch {
+        setIsAuthorized(false);
+        router.replace("/login");
+        router.refresh();
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    void validateSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session && !isAuthPage) {
+        setIsAuthorized(false);
+        router.replace("/login");
+        router.refresh();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [isAuthPage, router]);
+
+  if (isAuthPage) {
     return <>{children}</>;
+  }
+
+  if (isCheckingAuth) {
+    return (
+      <div className="page-gradient flex min-h-screen items-center justify-center p-4">
+        <div className="rounded-xl border border-border bg-card px-6 py-4 text-sm text-muted-foreground">
+          Verificando sesion...
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
   }
 
   const logout = async () => {
