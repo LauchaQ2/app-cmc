@@ -36,6 +36,15 @@ export function AppShell({ children }: AppShellProps) {
     pathname?.startsWith("/recuperar") ||
     pathname?.startsWith("/actualizar-password");
 
+  const redirectToLogin = () => {
+    setIsAuthorized(false);
+    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+      window.location.replace("/login");
+      return;
+    }
+    router.replace("/login");
+  };
+
   useEffect(() => {
     if (isAuthPage) {
       setIsAuthorized(true);
@@ -64,17 +73,13 @@ export function AppShell({ children }: AppShellProps) {
         if (!user || isExpired) {
           await supabase.auth.signOut();
           document.cookie = `${SESSION_COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`;
-          setIsAuthorized(false);
-          router.replace("/login");
-          router.refresh();
+          redirectToLogin();
           return;
         }
 
         setIsAuthorized(true);
       } catch {
-        setIsAuthorized(false);
-        router.replace("/login");
-        router.refresh();
+        redirectToLogin();
       } finally {
         setIsCheckingAuth(false);
       }
@@ -86,9 +91,7 @@ export function AppShell({ children }: AppShellProps) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session && !isAuthPage) {
-        setIsAuthorized(false);
-        router.replace("/login");
-        router.refresh();
+        redirectToLogin();
       }
     });
 
@@ -112,7 +115,13 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   if (!isAuthorized) {
-    return null;
+    return (
+      <div className="page-gradient flex min-h-screen items-center justify-center p-4">
+        <div className="rounded-xl border border-border bg-card px-6 py-4 text-sm text-muted-foreground">
+          Redirigiendo al login...
+        </div>
+      </div>
+    );
   }
 
   const logout = async () => {
