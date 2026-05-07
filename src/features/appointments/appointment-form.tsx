@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type AppointmentFormSchema = z.infer<typeof appointmentSchema>;
+type AppointmentFormSchema = z.input<typeof appointmentSchema>;
 
 type AppointmentFormProps = {
   clients: Client[];
